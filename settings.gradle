@@ -1,0 +1,2 @@
+rootProject.name='CrudLoginAndroid'
+include ':app'

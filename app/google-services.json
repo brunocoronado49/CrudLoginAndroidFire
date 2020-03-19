@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "906624589456",
+    "firebase_url": "https://crudloginan.firebaseio.com",
+    "project_id": "crudloginan",
+    "storage_bucket": "crudloginan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:906624589456:android:c8baef6f7b7db984104215",
+        "android_client_info": {
+          "package_name": "com.example.crudloginandroid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "906624589456-reedl4lbbbkq77kbj33netni8acputca.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.crudloginandroid",
+            "certificate_hash": "6bc9d17db48ab9a5d3085b03e04255ad6ed7e244"
+          }
+        },
+        {
+          "client_id": "906624589456-rtep62t8tmov7pv8357rtukafu4k0lgp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApecxjmwEx1a3nGchuYud7pl2sSOjfq0w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "906624589456-rtep62t8tmov7pv8357rtukafu4k0lgp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
