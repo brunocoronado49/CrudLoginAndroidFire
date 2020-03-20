@@ -46,7 +46,7 @@ allprojects {
         jcenter()
 
 
-
+        //phone
         mavenLocal()
         maven {
             url 'https://maven.google.com/'
@@ -68,7 +68,7 @@ allprojects {
 
 
 
-        
+
     }
 }
 
@@ -78,8 +78,8 @@ allprojects {
 ext {
     buildToolsVersion = "26.0.2"
     minSdkVersion = 16
-    compileSdkVersion = 26
-    targetSdkVersion = 26
+    compileSdkVersion = 29
+    targetSdkVersion = 29
     supportLibVersion = "26.1.0"
 }
 

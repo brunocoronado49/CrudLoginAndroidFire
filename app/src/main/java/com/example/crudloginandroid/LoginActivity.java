@@ -145,7 +145,7 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
         } catch (ApiException e) {
-            Log.w("Error", "Codigo Fallido" + e.getStatusCode());
+            Log.w("Error", "Cuenta fallida" + e.getStatusCode());
         }
     }
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
@@ -160,7 +160,7 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         } else {
-                            Log.w("Error", "signIn con credencial: fallado", task.getException());
+                            Log.w("Error", "signIn con credencial: error", task.getException());
                         }
                     }
                 });

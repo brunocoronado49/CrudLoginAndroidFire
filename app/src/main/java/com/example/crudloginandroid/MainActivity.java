@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         String nombre = datoNombre.getText().toString();
         String correo = datoCorreo.getText().toString();
         if(nombre.equals("")){
-            datoNombre.setError("required");
+            datoNombre.setError("Required");
         }
         else if(correo.equals("")){
             datoCorreo.setError("Required");

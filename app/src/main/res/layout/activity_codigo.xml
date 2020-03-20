@@ -36,6 +36,7 @@
 
             <Button
                 android:id="@+id/btnNumero"
+                android:onClick="requestCode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Enviar número"
@@ -52,6 +53,7 @@
 
             <Button
                 android:id="@+id/btnVerificacion"
+                android:onClick="signIn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Verificar"

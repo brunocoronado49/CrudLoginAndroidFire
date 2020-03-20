@@ -34,10 +34,9 @@ public class CodigoActivity extends AppCompatActivity {
     private Button btnnumero;
     private Button btnverificar;
 
-    private  String numero ="";
-    private String codigo ="";
+    //private String numero ="";
+    //private String codigo ="";
 
-    private boolean mVerificationInProgress = false;
     private String mVerificationId;
     private PhoneAuthProvider.ForceResendingToken mResendToken;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
@@ -47,6 +46,12 @@ public class CodigoActivity extends AppCompatActivity {
 
     FirebaseAuth mAuth;
     DatabaseReference referenceDb;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,71 +67,123 @@ public class CodigoActivity extends AppCompatActivity {
         btnnumero = findViewById(R.id.btnNumero);
         btnverificar = findViewById(R.id.btnVerificacion);
 
-        numero = txtnumero.getText().toString();
-        codigo = txtcodigo.getText().toString();
+        //numero = txtnumero.getText().toString();
+        //codigo = txtcodigo.getText().toString();
 
-        btnnumero.setOnClickListener(new View.OnClickListener() {
+        /*btnnumero.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startPhoneNumberVerification(numero);
-                mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                    @Override
-                    public void onVerificationCompleted(PhoneAuthCredential credential) {
-                        Log.d(TAG, "onVerificationCompleted:" + credential);
-                        mVerificationInProgress = false;
-                        signInWithPhoneAuthCredential(credential);
-                    }
-                    @Override
-                    public void onVerificationFailed(FirebaseException e) {
-                        Log.w(TAG, "onVerificationFailed", e);
-                        mVerificationInProgress = false;
-                        if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                            txtnumero.setError("Número invalido.");
-                        } else if (e instanceof FirebaseTooManyRequestsException) {
-                            Toast.makeText(CodigoActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    @Override
-                    public void onCodeSent(@NonNull String verificationId, @NonNull PhoneAuthProvider.ForceResendingToken token) {
-                        Log.d(TAG, "onCodeSent:" + verificationId);
-                        mVerificationId = verificationId;
-                        mResendToken = token;
-                    }
-                };
             }
         });
-
+        mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            @Override
+            public void onVerificationCompleted(PhoneAuthCredential credential) {
+                Log.d(TAG, "onVerificationCompleted:" + credential);
+                mVerificationInProgress = false;
+                signInWithPhoneAuthCredential(credential);
+            }
+            @Override
+            public void onVerificationFailed(FirebaseException e) {
+                Log.w(TAG, "onVerificationFailed", e);
+                mVerificationInProgress = false;
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                    txtnumero.setError("Número invalido.");
+                } else if (e instanceof FirebaseTooManyRequestsException) {
+                    Toast.makeText(CodigoActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onCodeSent(@NonNull String verificationId, @NonNull PhoneAuthProvider.ForceResendingToken token) {
+                Log.d(TAG, "onCodeSent:" + verificationId);
+                mVerificationId = verificationId;
+                mResendToken = token;
+            }
+        };
         btnverificar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 verifyPhoneNumberWithCode(mVerificationId, codigo);
             }
+        });*/
+
+        btnnumero.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestCode(v);
+                mAuthListener = new FirebaseAuth.AuthStateListener() {
+                    @Override
+                    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                        if (firebaseAuth.getCurrentUser() != null) {
+                            Toast.makeText(CodigoActivity.this, getString(R.string.now_logged_in) + firebaseAuth.getCurrentUser().getProviderId(), Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(CodigoActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                };
+            }
+        });
+        btnverificar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signIn(v);
+            }
         });
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() != null) {
-                    Toast.makeText(CodigoActivity.this, getString(R.string.now_logged_in) + firebaseAuth.getCurrentUser().getProviderId(), Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(CodigoActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
+    }
+
+    public void requestCode(View view) {
+        String phoneNumber = txtnumero.getText().toString();
+        if (TextUtils.isEmpty(phoneNumber))
+            return;
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                phoneNumber, 30, TimeUnit.SECONDS, CodigoActivity.this, new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    @Override
+                    public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+                        signInWithCredential(phoneAuthCredential);
+                    }
+                    @Override
+                    public void onVerificationFailed(FirebaseException e) {
+                        Toast.makeText(CodigoActivity.this, "onVerificationFailed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onCodeSent(String verificationId, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                        super.onCodeSent(verificationId, forceResendingToken);
+                        mVerificationId = verificationId;
+                    }
+                    @Override
+                    public void onCodeAutoRetrievalTimeOut(String verificationId) {
+                        super.onCodeAutoRetrievalTimeOut(verificationId);
+                        Toast.makeText(CodigoActivity.this, "onCodeAutoRetrievalTimeOut :" + verificationId, Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        };
-
+        );
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-        if (mVerificationInProgress && validatePhoneNumber()) {
-            startPhoneNumberVerification(txtnumero.getText().toString());
-        }
+    private void signInWithCredential(PhoneAuthCredential phoneAuthCredential) {
+        mAuth.signInWithCredential(phoneAuthCredential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(CodigoActivity.this, R.string.signed_success, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(CodigoActivity.this, "Error al entrar", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
-    private boolean validatePhoneNumber() {
+    public void signIn(View view) {
+        String code = txtcodigo.getText().toString();
+        if (TextUtils.isEmpty(code))
+            return;
+        signInWithCredential(PhoneAuthProvider.getCredential(mVerificationId, code));
+    }
+
+
+    /*private boolean validatePhoneNumber() {
         String phoneNumber = txtnumero.getText().toString();
         if (TextUtils.isEmpty(phoneNumber)) {
             txtnumero.setError("Número invalido");
@@ -137,15 +194,12 @@ public class CodigoActivity extends AppCompatActivity {
     }
 
     private void startPhoneNumberVerification(String phoneNumber) {
-        // [START start_phone_auth]
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
                 phoneNumber,        // Phone number to verify
                 30,                 // Timeout duration
                 TimeUnit.SECONDS,   // Unit of timeout
                 this,               // Activity (for callback binding)
                 mCallbacks);        // OnVerificationStateChangedCallbacks
-        // [END start_phone_auth]
-
         mVerificationInProgress = true;
     }
 
@@ -162,7 +216,7 @@ public class CodigoActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = task.getResult().getUser();
-                            //startActivity(new Intent(CodigoActivity.this, MainActivity.class));
+                            startActivity(new Intent(CodigoActivity.this, MainActivity.class));
                         } else {
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
@@ -172,6 +226,6 @@ public class CodigoActivity extends AppCompatActivity {
                         }
                     }
                 });
-    }
+    }*/
 
 }
