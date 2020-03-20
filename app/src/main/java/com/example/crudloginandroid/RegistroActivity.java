@@ -38,7 +38,6 @@ public class RegistroActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     DatabaseReference referenceDb;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +109,7 @@ public class RegistroActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if(mAuth.getCurrentUser() != null){
-            startActivity(new Intent(RegistroActivity.this, MainActivity.class));
+            startActivity(new Intent(RegistroActivity.this, CodigoActivity.class));
             finish();
         }
     }
