@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="15dp"
-    tools:context=".MainActivity">
+    tools:context=".CodigoActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -25,40 +25,36 @@
                 android:layout_gravity="center"
                 android:textAlignment="center"
                 android:textSize="20dp"
-                android:text="REGISTRO"/>
+                android:text="Verifica tu número de teléfono"/>
 
             <EditText
-                android:id="@+id/txtNombreR"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nombre"/>
-
-            <EditText
-                android:id="@+id/txtNumeroR"
+                android:id="@+id/txtNumero"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:hint="+52(Número)"/>
 
-            <EditText
-                android:id="@+id/txtCorreoR"
+            <Button
+                android:id="@+id/btnNumero"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Enviar número"
                 android:layout_marginTop="15dp"
-                android:hint="Correo"/>
+                android:background="@color/colorPrimary"
+                android:textColor="@android:color/white" />
 
             <EditText
-                android:id="@+id/txtPasswordR"
+                android:id="@+id/txtCodigo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:hint="Contraseña"/>
+                android:hint="Código de verificación"/>
 
             <Button
-                android:id="@+id/btnRegistro"
+                android:id="@+id/btnVerificacion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Registrar"
+                android:text="Verificar"
                 android:layout_marginTop="15dp"
                 android:background="@color/colorPrimary"
                 android:textColor="@android:color/white" />
