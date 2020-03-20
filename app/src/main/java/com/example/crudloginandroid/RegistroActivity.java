@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,8 +15,11 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
+import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DatabaseReference;
@@ -40,11 +44,29 @@ public class RegistroActivity extends AppCompatActivity {
     //Registro Normal y por Mensage
     private EditText rPhone;
 
-    private FirebaseAuth.AuthStateListener mAuthListener;
+
+    //TELEFONO
+    private String code ="";
+    private boolean mVerificationInProgress = false;
     private String mVerificationId;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private PhoneAuthProvider.ForceResendingToken mResendToken;
+    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
+    private EditText codigo;
+    private Button verify;
+    private String TAG ="RegisterActivity";
 
     FirebaseAuth mAuth;
     DatabaseReference referenceDb;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mVerificationInProgress && validatePhoneNumber()) {
+            startPhoneNumberVerification(rPhone.getText().toString());
+        }
+        mAuth.addAuthStateListener(mAuthListener);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +81,12 @@ public class RegistroActivity extends AppCompatActivity {
         rCorreo = findViewById(R.id.txtCorreoR);
         rPassword = findViewById(R.id.txtPasswordR);
         btnRegistrarse = findViewById(R.id.btnRegistro);
+
+        //TELEFONO
+        codigo = findViewById(R.id.txtCodigo);
+        verify = findViewById(R.id.btnVierificar);
+        telefono = rPhone.getText().toString();
+        code = codigo.getText().toString();
 
         //REGISTRO
         btnRegistrarse.setOnClickListener(new View.OnClickListener() {
@@ -79,39 +107,13 @@ public class RegistroActivity extends AppCompatActivity {
                 else{
                     Toast.makeText( RegistroActivity.this, "Complete los campos", Toast.LENGTH_SHORT).show();
                 }
-
-                //TELEFONO
-                if (TextUtils.isEmpty(telefono))
-                    return;
-                PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                        telefono, 30, TimeUnit.SECONDS, RegistroActivity.this, new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                            @Override
-                            public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-                                //Called if it is not needed to enter verification code
-                                signInWithCredential(phoneAuthCredential);
-                            }
-                            @Override
-                            public void onVerificationFailed(FirebaseException e) {
-                                //incorrect phone number, verification code, emulator, etc.
-                                Toast.makeText(RegistroActivity.this, "onVerificationFailed " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                            @Override
-                            public void onCodeSent(String verificationId, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-                                //now the code has been sent, save the verificationId we may need it
-                                super.onCodeSent(verificationId, forceResendingToken);
-                                mVerificationId = verificationId;
-                            }
-                            @Override
-                            public void onCodeAutoRetrievalTimeOut(String verificationId) {
-                                //called after timeout if onVerificationCompleted has not been called
-                                super.onCodeAutoRetrievalTimeOut(verificationId);
-                                Toast.makeText(RegistroActivity.this, "onCodeAutoRetrievalTimeOut :" + verificationId, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                );
+                validatePhoneNumber();
+                startPhoneNumberVerification(telefono);
+                verifyPhoneNumberWithCode(mVerificationId ,code);
             }
         });
 
+        //LLAMADAS A METODOS TELEFONO
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -123,12 +125,57 @@ public class RegistroActivity extends AppCompatActivity {
                 }
             }
         };
-
+        mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            @Override
+            public void onVerificationCompleted(PhoneAuthCredential credential) {
+                Log.d(TAG, "Verificacion Completada:" + credential);
+                mVerificationInProgress = false;
+                startActivity(new Intent(RegistroActivity.this, MainActivity.class));
+                signInWithPhoneAuthCredential(credential);
+            }
+            @Override
+            public void onVerificationFailed(FirebaseException e) {
+                Log.w(TAG, "Verificacion Fallida", e);
+                mVerificationInProgress = false;
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                    rPhone.setError("Numero invalido.");
+                } else if (e instanceof FirebaseTooManyRequestsException) {
+                    Toast.makeText(RegistroActivity.this, "Tiempo agotado. " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                Toast.makeText(RegistroActivity.this, "Mala Verificacion", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onCodeSent(@NonNull String verificationId,
+                                   @NonNull PhoneAuthProvider.ForceResendingToken token) {
+                Log.d(TAG, "Enviando codigo:" + verificationId);
+                mVerificationId = verificationId;
+                mResendToken = token;
+                Toast.makeText(RegistroActivity.this, "Enviado", Toast.LENGTH_SHORT).show();
+            }
+        };
+        verify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                validatePhoneNumber();
+                startPhoneNumberVerification(telefono);
+                verifyPhoneNumberWithCode(mVerificationId ,code);
+            }
+        });
     }
 
     //TELEFONO
-    private void signInWithCredential(PhoneAuthCredential phoneAuthCredential) {
-        mAuth.signInWithCredential(phoneAuthCredential)
+    private void startPhoneNumberVerification(String telefono) {
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                telefono, 30, TimeUnit.SECONDS, this, mCallbacks);
+
+        mVerificationInProgress = true;
+    }
+    private void verifyPhoneNumberWithCode(String verificationId, String code) {
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
+        signInWithPhoneAuthCredential(credential);
+    }
+    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
+        mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -140,8 +187,18 @@ public class RegistroActivity extends AppCompatActivity {
                     }
                 });
     }
+    private boolean validatePhoneNumber() {
+        String phoneNumber = rPhone.getText().toString();
+        if (TextUtils.isEmpty(phoneNumber)) {
+            rPhone.setError("Numero invalido.");
+            return false;
+        }
+        return true;
+    }
 
-    //CONFUSIONPARAELTELEFONO
+
+
+    //REGISTROEMAILPASS
     private void registrarUsuario() {
         final String name = rNombre.getText().toString().trim();
         final String phone = rPhone.getText().toString().trim();
@@ -164,7 +221,8 @@ public class RegistroActivity extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task2) {
                                         if(task2.isSuccessful()){
-                                            startActivity(new Intent(RegistroActivity.this, MainActivity.class));
+                                            Toast.makeText(RegistroActivity.this, "Registrado correctamente", Toast.LENGTH_SHORT).show();
+                                            startActivity(new Intent(RegistroActivity.this, RegistroActivity.class));
                                             finish();
                                         }
                                         else{
@@ -174,28 +232,11 @@ public class RegistroActivity extends AppCompatActivity {
                                 });
                             } else
                                 Toast.makeText(RegistroActivity.this, "Error, puede que ya exista", Toast.LENGTH_SHORT).show();
-
                         }
                     });
         }
 
     }
 
-    public void signIn(View view) {
-        String code = rPhone.getText().toString();
-        if (TextUtils.isEmpty(code))
-            return;
 
-        signInWithCredential(PhoneAuthProvider.getCredential(mVerificationId, code));
-    }
-
-    @Override
-    protected void onStart () {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-        if (mAuth.getCurrentUser() != null) {
-            startActivity(new Intent(RegistroActivity.this, MainActivity.class));
-            finish();
-        }
-    }
 }

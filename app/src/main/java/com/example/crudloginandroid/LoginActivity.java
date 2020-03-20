@@ -145,22 +145,22 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
         } catch (ApiException e) {
-            Log.w("Error", "signInResult:failed code=" + e.getStatusCode());
+            Log.w("Error", "Codigo Fallido" + e.getStatusCode());
         }
     }
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d("Aut", "firebaseAuthWithGoogle:" + acct.getId());
+        Log.d("Aut", "Loguin con Google:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d("Bien", "signInWithCredential:success");
+                            Log.d("Bien", "signIn con credencial: correcto");
                             FirebaseUser user = mAuth.getCurrentUser();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         } else {
-                            Log.w("Error", "signInWithCredential:failure", task.getException());
+                            Log.w("Error", "signIn con credencial: fallado", task.getException());
                         }
                     }
                 });

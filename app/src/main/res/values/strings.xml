@@ -3,4 +3,5 @@
     <string name="now_logged_in" />
     <string name="signed_success" />
     <string name="sign_credential_fail" />
+    <string name="signin">SignIn</string>
 </resources>

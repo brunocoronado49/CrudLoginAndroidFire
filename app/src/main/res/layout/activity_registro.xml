@@ -23,18 +23,6 @@
         android:hint="Nombre"/>
 
     <EditText
-        android:id="@+id/txtPhoneR"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:hint="+52(Número)"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Al agregar tu número recibirás un mensaje para la verificación"/>
-
-    <EditText
         android:id="@+id/txtCorreoR"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,16 +36,42 @@
         android:layout_marginTop="15dp"
         android:hint="Contraseña"/>
 
+    <EditText
+        android:id="@+id/txtPhoneR"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:hint="+52(Número)"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Al agregar tu número recibirás un mensaje para la verificación"/>
+
+
     <Button
         android:id="@+id/btnRegistro"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Registrar"
-        android:onClick="requestCode"
+        android:layout_marginTop="15dp"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white" />
+
+    <EditText
+        android:id="@+id/txtCodigo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:hint="Ingresa el cídogo que recibiste en tu teléfono"/>
+
+    <Button
+        android:id="@+id/btnVierificar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Verificar"
         android:layout_marginTop="15dp"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"/>
-
-
 
 </LinearLayout>
