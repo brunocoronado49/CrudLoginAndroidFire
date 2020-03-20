@@ -104,7 +104,7 @@ public class CodigoActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(CodigoActivity.this, R.string.signed_success, Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(CodigoActivity.this, MainActivity.class));
                         } else {
                             Toast.makeText(CodigoActivity.this, "Error al entrar", Toast.LENGTH_SHORT).show();
                         }
